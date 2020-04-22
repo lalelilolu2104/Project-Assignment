@@ -1,0 +1,317 @@
+<p id="notice"><%= notice %></p>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+  <script src="/leaflet.polylineDecorator.js"></script>
+  
+  <style>
+    #map {
+      margin: 0;
+      position: absolute; 
+      top: 50%; 
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width:1050px; 
+      height:860px;
+    }
+    
+    /* The Modal (background) */
+    .Modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      padding-top: 100px; /* Location of the box */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+    }
+    
+    /* Modal Content (image) */
+    .modal-content {
+      margin: auto;
+      display: block;
+      width: 80%;
+      max-width: 700px;
+    }
+
+    /* Caption of Modal Image */
+    .caption {
+      margin: auto;
+      display: block;
+      width: 80%;
+      max-width: 700px;
+      text-align: center;
+      color: #ccc;
+      padding: 10px 0;
+      height: 150px;
+    }
+
+    /* Add Animation */
+    .modal-content, #caption {  
+      -webkit-animation-name: zoom;
+      -webkit-animation-duration: 0.6s;
+      animation-name: zoom;
+      animation-duration: 0.6s;
+    }
+
+    @-webkit-keyframes zoom {
+      from {-webkit-transform:scale(0)} 
+      to {-webkit-transform:scale(1)}
+    }
+
+    @keyframes zoom {
+      from {transform:scale(0)} 
+      to {transform:scale(1)}
+    }
+
+    /* The Close Button */
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 35px;
+      color: #f1f1f1;
+      font-size: 40px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #bbb;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+      /* 100% Image Width on Smaller Screens */
+    @media only screen and (max-width: 700px){
+      .modal-content {
+        width: 100%;
+      }
+    }
+    
+    .header{
+      margin: 0px;
+      padding: 0px;
+      border: 0px;
+      outline: 0px;
+    }
+    
+    .body{
+      margin: 0px;
+      padding: 0px;
+      border: 0px;
+      outline: 0px;
+    }
+    
+    .navbar{
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 1500px;
+      height: 100px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      background-color: #c1e3d8;
+    }
+    
+    .navbar-tool{
+      margin-left: 20px;
+    }
+    
+    /* Upload and Download Buttons */
+    .button{
+      border: 2px solid black;
+      border-radius: 5px;
+      background-color: white;
+      color: black;
+      padding: 14px 28px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .download{
+      border-color: #2196F3;
+      color: dodgerblue;
+    }
+    
+    .download:hover{
+      background: #2196F3;
+      color: white;
+    }
+    
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input { 
+      opacity: 0;
+    width: 0;
+    height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+    
+    /* Range Slider */
+    section.range-slider {
+      position: relative;
+      width: 200px;
+      height: 35px;
+      text-align: center;
+    }
+
+    section.range-slider input {
+      pointer-events: none;
+      position: absolute;
+      overflow: hidden;
+      left: 0;
+      top: 15px;
+      width: 200px;
+      outline: none;
+      height: 18px;
+      margin: 0;
+      padding: 0;
+    }
+
+    section.range-slider input::-webkit-slider-thumb {
+      pointer-events: all;
+      position: relative;
+      z-index: 1;
+      outline: 0;
+    }
+
+    section.range-slider input::-moz-range-thumb {
+      pointer-events: all;
+      position: relative;
+      z-index: 10;
+      -moz-appearance: none;
+      width: 9px;
+    }
+
+    section.range-slider input::-moz-range-track {
+      position: relative;
+      z-index: -1;
+      background-color: rgba(0, 0, 0, 1);
+      border: 0;
+    }
+    
+    section.range-slider input:last-of-type::-moz-range-track {
+      -moz-appearance: none;
+      background: none transparent;
+      border: 0;
+    }
+    
+    section.range-slider input[type=range]::-moz-focus-outer {
+      border: 0;
+    }
+  </style>
+</head>
+
+<header>
+    
+  <!-- contains form to input the files -->
+  <nav class="navbar">
+    <!-- contains form to input the files -->
+    <%= form_for(Place.new) do |f| %>
+      <%= f.file_field :images, multiple: true, accept: ".jpg" %>
+      <br/>
+      <%= f.submit "Submit", id: "sub", hidden: true %>
+    <% end %><br/>
+
+	  <button id='download' class="button download">
+	    Download
+	  </button>
+			  
+	  <div class = "navbar-tool">
+		  <label class="switch">
+        <input id="cameraDirection" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <h3>Direction</h3>
+			  
+	  <div class = "navbar-tool">
+  	  <label class="switch">
+        <input id="cameraFOV" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <h3>FOV</h3>
+			  
+		<!-- Range Slider -->
+	  <div class = "navbar-tool">
+  		<section class="range-slider">
+        <span class="rangeValues"></span>
+        <input id="leftSlider" value="20190708" min="20190708" max="20200115" step="1" type="range">
+        <input id="rightSlider" value="20200115" min="20190708" max="20200115" step="1" type="range">
+      </section>
+    </div>
+  </nav>
+</header>
+
+
+<body>
+  <script>
+    window.imgLocations = <%= @placeAry.to_json.html_safe %>;
+    window.L = L;
+  </script>
+  <div id="map" style="width:100%;height:600px;top:56%"></div>
+  <div id="modalContainer"></div>
+  <script src="https://npmcdn.com/leaflet-geometryutil"></script>
+  <script src="/leaflet-arrowheads.js"></script>
+  <script src="/index.js"></script>
+</body>
